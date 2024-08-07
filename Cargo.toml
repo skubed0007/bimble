@@ -1,0 +1,18 @@
+[package]
+name = "bimble"
+version = "0.1.0"
+edition = "2021"
+
+[profile.release]
+opt-level = "z"        # Optimizes for size
+codegen-units = 1      # Reduces the number of codegen units to improve optimization at the cost of compilation time
+lto = "fat"            # Enables Link Time Optimization for better performance
+debug = false          # Strips debug information for smaller binary size
+rpath = false          # Disables rpath
+panic = "abort"        # Use abort on panic for smaller binaries
+incremental = false    # Disables incremental compilation for faster binaries
+overflow-checks = false # Disables overflow checks for release builds
+
+[dependencies]
+clearscreen = "3.0.0"
+colored = "2.1.0"
