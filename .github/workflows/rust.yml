@@ -40,13 +40,13 @@ jobs:
 
       - name: Verify Build Output (Linux)
         run: |
-          if [ ! -f target/x86_64-unknown-linux-gnu/release/Bimble ]; then
-            echo "Build output not found: target/x86_64-unknown-linux-gnu/release/Bimble"
+          if [ ! -f target/x86_64-unknown-linux-gnu/release/bimble ]; then
+            echo "Build output not found: target/x86_64-unknown-linux-gnu/release/bimble"
             exit 1
           fi
 
       - name: Package for Release (Linux)
-        run: zip -r bimble_linux.zip target/x86_64-unknown-linux-gnu/release/Bimble
+        run: zip -r bimble_linux.zip target/x86_64-unknown-linux-gnu/release/bimble
 
       - name: Upload Artifact (Linux)
         uses: actions/upload-artifact@v3
