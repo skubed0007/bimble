@@ -181,10 +181,10 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ needs.build-linux.outputs.new_version }}
-          release_name: Release ${{ needs.build-linux.outputs.new_version }}
+          tag_name: v1.0.0
+          release_name: Release v1.0.0
           body: |
-            Release notes for ${{ needs.build-linux.outputs.new_version }}
+            Release notes for v1.0.0
             Added windows, mac, linux removed source code, targets folders and integrations, kept bimble the command, changed fork and recreated from ground up, updated repo, removed readme file, added vc_redist 64Bit in bimble_windows.zip file
           draft: false
           prerelease: false
