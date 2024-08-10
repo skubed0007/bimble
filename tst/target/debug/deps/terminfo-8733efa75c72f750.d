@@ -1,0 +1,18 @@
+/home/joy/Documents/projects/rust/BB/bimble/target/debug/deps/libterminfo-8733efa75c72f750.rmeta: /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/lib.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/error.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/mod.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/util.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/compiled.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/expansion.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/source.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/expand.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/capability.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/database.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/names.rs /home/joy/Documents/projects/rust/BB/bimble/target/debug/build/terminfo-b035cacf31b4b8b1/out/names.rs
+
+/home/joy/Documents/projects/rust/BB/bimble/target/debug/deps/terminfo-8733efa75c72f750.d: /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/lib.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/error.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/mod.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/util.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/compiled.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/expansion.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/source.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/expand.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/capability.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/database.rs /home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/names.rs /home/joy/Documents/projects/rust/BB/bimble/target/debug/build/terminfo-b035cacf31b4b8b1/out/names.rs
+
+/home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/lib.rs:
+/home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/error.rs:
+/home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/mod.rs:
+/home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/util.rs:
+/home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/compiled.rs:
+/home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/expansion.rs:
+/home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/parser/source.rs:
+/home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/expand.rs:
+/home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/capability.rs:
+/home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/database.rs:
+/home/joy/.cargo/registry/src/index.crates.io-6f17d22bba15001f/terminfo-0.8.0/src/names.rs:
+/home/joy/Documents/projects/rust/BB/bimble/target/debug/build/terminfo-b035cacf31b4b8b1/out/names.rs:
+
+# env-dep:OUT_DIR=/home/joy/Documents/projects/rust/BB/bimble/target/debug/build/terminfo-b035cacf31b4b8b1/out
