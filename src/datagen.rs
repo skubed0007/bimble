@@ -182,7 +182,11 @@ fn compile_binary(
 
     match fs::copy(base_vm, &output_file) {
         Ok(_) => {
-            match OpenOptions::new().append(true).write(true).open(&output_file) {
+            match OpenOptions::new()
+                .append(true)
+                .write(true)
+                .open(&output_file)
+            {
                 Ok(mut exe) => {
                     let code_length = binary_code.chars().count();
 
@@ -190,7 +194,8 @@ fn compile_binary(
                     if exe.seek(std::io::SeekFrom::End(0)).is_err() {
                         eprintln!(
                             "{}{}",
-                            format!("Unable to seek to the end of the {} executable: ", platform).red(),
+                            format!("Unable to seek to the end of the {} executable: ", platform)
+                                .red(),
                             output_file.bold().red()
                         );
                         return;
@@ -199,7 +204,8 @@ fn compile_binary(
                     if exe.write_all(binary_code.as_bytes()).is_err() {
                         eprintln!(
                             "{}{}",
-                            format!("Unable to write binary code to {} executable: ", platform).red(),
+                            format!("Unable to write binary code to {} executable: ", platform)
+                                .red(),
                             output_file.bold().red()
                         );
                         return;
@@ -215,10 +221,17 @@ fn compile_binary(
                     length_data[length_pos..].copy_from_slice(length_str.as_bytes());
 
                     // Write the length at the end of the file
-                    if exe.seek(std::io::SeekFrom::End(-(length_padding as i64))).is_err() {
+                    if exe
+                        .seek(std::io::SeekFrom::End(-(length_padding as i64)))
+                        .is_err()
+                    {
                         eprintln!(
                             "{}{}",
-                            format!("Unable to seek to length padding position in {} executable: ", platform).red(),
+                            format!(
+                                "Unable to seek to length padding position in {} executable: ",
+                                platform
+                            )
+                            .red(),
                             output_file.bold().red()
                         );
                         return;
@@ -227,7 +240,11 @@ fn compile_binary(
                     if exe.write_all(&length_data).is_err() {
                         eprintln!(
                             "{}{}",
-                            format!("Unable to write length padding to {} executable: ", platform).red(),
+                            format!(
+                                "Unable to write length padding to {} executable: ",
+                                platform
+                            )
+                            .red(),
                             output_file.bold().red()
                         );
                         return;
@@ -235,10 +252,10 @@ fn compile_binary(
 
                     println!(
                         "{}{}{}{}",
-                        "Successfully compiled for ".green(),
-                        platform.bold().green(),
-                        " at -> ".green(),
-                        platform_dir.green()
+                        "Successfully compiled for ".blue(),
+                        platform.bold().cyan(),
+                        " at -> ".blue(),
+                        platform_dir.cyan()
                     );
                 }
                 Err(err) => {
