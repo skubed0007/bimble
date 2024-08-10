@@ -1,6 +1,5 @@
-ON m(){
-    may name = 0
-    echoln(name)
-    m()
+may name = "joy"
+greet()
+ON greet(){
+    echoln("Nice too meet you ",name)
 }
-ON i(){}
