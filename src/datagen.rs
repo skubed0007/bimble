@@ -31,7 +31,7 @@ pub fn compile_project(project_path: String) {
     // Parse Compiler Configuration
     match fs::read_to_string(&config_file) {
         Ok(config_content) => {
-            let config_lines: Vec<&str> = config_content.split('\n').collect();
+            let config_lines: Vec<&str> = config_content.lines().collect();
             let mut parsed_config = CompilerConfig::new();
             for (line_number, line) in config_lines.iter().enumerate() {
                 let parts: Vec<&str> = line.split(':').map(|s| s.trim()).collect();
@@ -48,7 +48,7 @@ pub fn compile_project(project_path: String) {
                     let key = parts[0].to_ascii_uppercase();
                     let value = parts[1].to_string();
 
-                    match key.as_str().to_ascii_uppercase().trim() {
+                    match key.as_str() {
                         "NAME" => parsed_config.name = value,
                         "AUTHORS" => parsed_config.authors = value,
                         "VER" => parsed_config.version = value,
@@ -112,22 +112,13 @@ pub fn compile_project(project_path: String) {
                 binary_code.push_str(&format!("{:08b}", byte).trim());
                 binary_code.push('.');
             }
-            let linux_vm = "./1.24";
-            let windows_vm = "./2.24";
+            let linux_vm = "./lb.bjb";
+            let windows_vm = "./wb.bjb";
             let build_dir = format!("{}/build", project_path);
 
-            if Path::try_exists(Path::new(&build_dir)).unwrap() {
-                if fs::metadata(&build_dir).unwrap().is_dir() {
-                    if let Err(err) = fs::remove_dir_all(&build_dir) {
-                        eprintln!(
-                            "{}{}{}",
-                            "Unable to delete build directory at: ".red(),
-                            build_dir.bold().red(),
-                            format!(". Error details: {}", err).red()
-                        );
-                        exit(-1);
-                    }
-                }
+            if let Err(err) = clean_build_dir(&build_dir) {
+                eprintln!("{}", err);
+                exit(-1);
             }
 
             if let Err(err) = fs::create_dir(&build_dir) {
@@ -156,6 +147,40 @@ pub fn compile_project(project_path: String) {
     }
 }
 
+fn clean_build_dir(build_dir: &str) -> Result<(), String> {
+    if Path::new(build_dir).exists() {
+        match fs::metadata(build_dir) {
+            Ok(metadata) => {
+                if metadata.is_dir() {
+                    if let Err(err) = fs::remove_dir_all(build_dir) {
+                        return Err(format!(
+                            "{}{}{}",
+                            "Unable to delete build directory at: ".red(),
+                            build_dir.bold().red(),
+                            format!(". Error details: {}", err).red()
+                        ));
+                    }
+                } else {
+                    return Err(format!(
+                        "{}{}",
+                        "Build path exists but is not a directory: ".red(),
+                        build_dir.bold().red()
+                    ));
+                }
+            }
+            Err(err) => {
+                return Err(format!(
+                    "{}{}{}",
+                    "Unable to access build directory metadata at: ".red(),
+                    build_dir.bold().red(),
+                    format!(". Error details: {}", err).red()
+                ));
+            }
+        }
+    }
+    Ok(())
+}
+
 fn compile_binary(
     platform: &str,
     build_dir: &str,
@@ -182,25 +207,33 @@ fn compile_binary(
 
     match fs::copy(base_vm, &output_file) {
         Ok(_) => {
-            match OpenOptions::new().append(true).write(true).open(&output_file) {
+            match OpenOptions::new()
+                .append(true)
+                .write(true)
+                .open(&output_file)
+            {
                 Ok(mut exe) => {
                     let code_length = binary_code.chars().count();
 
                     // Append the binary code to the executable
-                    if exe.seek(std::io::SeekFrom::End(0)).is_err() {
+                    if let Err(err) = exe.seek(std::io::SeekFrom::End(0)) {
                         eprintln!(
-                            "{}{}",
-                            format!("Unable to seek to the end of the {} executable: ", platform).red(),
-                            output_file.bold().red()
+                            "{}{}{}",
+                            format!("Unable to seek to the end of the {} executable: ", platform)
+                                .red(),
+                            output_file.bold().red(),
+                            format!(". Error details: {}", err).red()
                         );
                         return;
                     }
 
-                    if exe.write_all(binary_code.as_bytes()).is_err() {
+                    if let Err(err) = exe.write_all(binary_code.as_bytes()) {
                         eprintln!(
-                            "{}{}",
-                            format!("Unable to write binary code to {} executable: ", platform).red(),
-                            output_file.bold().red()
+                            "{}{}{}",
+                            format!("Unable to write binary code to {} executable: ", platform)
+                                .red(),
+                            output_file.bold().red(),
+                            format!(". Error details: {}", err).red()
                         );
                         return;
                     }
@@ -215,30 +248,40 @@ fn compile_binary(
                     length_data[length_pos..].copy_from_slice(length_str.as_bytes());
 
                     // Write the length at the end of the file
-                    if exe.seek(std::io::SeekFrom::End(-(length_padding as i64))).is_err() {
+                    if let Err(err) = exe.seek(std::io::SeekFrom::End(-(length_padding as i64))) {
                         eprintln!(
-                            "{}{}",
-                            format!("Unable to seek to length padding position in {} executable: ", platform).red(),
-                            output_file.bold().red()
+                            "{}{}{}",
+                            format!(
+                                "Unable to seek to length padding position in {} executable: ",
+                                platform
+                            )
+                            .red(),
+                            output_file.bold().red(),
+                            format!(". Error details: {}", err).red()
                         );
                         return;
                     }
 
-                    if exe.write_all(&length_data).is_err() {
+                    if let Err(err) = exe.write_all(&length_data) {
                         eprintln!(
-                            "{}{}",
-                            format!("Unable to write length padding to {} executable: ", platform).red(),
-                            output_file.bold().red()
+                            "{}{}{}",
+                            format!(
+                                "Unable to write length padding to {} executable: ",
+                                platform
+                            )
+                            .red(),
+                            output_file.bold().red(),
+                            format!(". Error details: {}", err).red()
                         );
                         return;
                     }
 
                     println!(
                         "{}{}{}{}",
-                        "Successfully compiled for ".green(),
-                        platform.bold().green(),
-                        " at -> ".green(),
-                        platform_dir.green()
+                        "Successfully compiled for ".blue(),
+                        platform.bold().cyan(),
+                        " at -> ".blue(),
+                        platform_dir.cyan()
                     );
                 }
                 Err(err) => {
@@ -254,7 +297,11 @@ fn compile_binary(
         Err(err) => {
             eprintln!(
                 "{}{}{}",
-                format!("Unable to copy base VM to {} executable at: ", platform).red(),
+                format!(
+                    "Unable to copy base virtual machine (VM) for {} from {} to: ",
+                    platform, base_vm
+                )
+                .red(),
                 output_file.bold().red(),
                 format!(". Error details: {}", err).red()
             );
