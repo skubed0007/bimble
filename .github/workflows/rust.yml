@@ -1,0 +1,222 @@
+name: CI
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.increment_version.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: git fetch --prune --unshallow
+
+      - name: Get Latest Tag
+        id: get_latest_tag
+        run: echo "latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
+
+      - name: Increment Version
+        id: increment_version
+        run: |
+          latest_tag=${{ env.latest_tag }}
+          echo "Latest tag: $latest_tag"
+          version=${latest_tag#v}
+          major=$(echo $version | cut -d. -f1)
+          minor=$(echo $version | cut -d. -f2)
+          patch=$(echo $version | cut -d. -f3)
+          new_version="v$major.$minor.$((patch + 1))"
+          echo "::set-output name=new_version::$new_version"
+
+      - name: Build for Linux
+        run: cargo build --release --target x86_64-unknown-linux-gnu
+
+      - name: Verify Build Output (Linux)
+        run: |
+          if [ ! -f target/x86_64-unknown-linux-gnu/release/bimble ]; then
+            echo "Build output not found: target/x86_64-unknown-linux-gnu/release/bimble"
+            exit 1
+          fi
+
+      - name: Package for Release (Linux)
+        run: zip -r bimble_linux.zip target/x86_64-unknown-linux-gnu/release/bimble
+
+      - name: Upload Artifact (Linux)
+        uses: actions/upload-artifact@v3
+        with:
+          name: bimble_linux
+          path: bimble_linux.zip
+
+  build-windows:
+    runs-on: windows-latest
+    needs: build-linux
+    outputs:
+      new_version: ${{ needs.build-linux.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: git fetch --prune --unshallow
+
+      - name: Get Latest Tag
+        id: get_latest_tag
+        run: |
+          $latestTag = git describe --tags (git rev-list --tags --max-count=1)
+          echo "latest_tag=$latestTag" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Increment Version
+        id: increment_version
+        run: |
+          $latestTag = "${{ env.latest_tag }}"
+          Write-Host "Latest tag: $latestTag"
+          $version = $latestTag.TrimStart('v')
+          $major, $minor, $patch = $version -split '\.'
+          $newVersion = "v$major.$minor.$($patch + 1)"
+          echo "::set-output name=new_version::$newVersion"
+
+      - name: Build for Windows
+        run: cargo build --release --target x86_64-pc-windows-msvc
+
+      - name: Verify Build Output (Windows)
+        shell: pwsh
+        run: |
+          if (!(Test-Path -Path target\x86_64-pc-windows-msvc\release\bimble.exe)) {
+            Write-Error "Build output not found: target\x86_64-pc-windows-msvc\release\bimble.exe"
+            exit 1
+          }
+
+      - name: Download vc_redist.x64.exe
+        run: Invoke-WebRequest -Uri https://aka.ms/vs/17/release/vc_redist.x64.exe -OutFile vc_redist.x64.exe
+
+      - name: Package for Release (Windows)
+        shell: pwsh
+        run: |
+          Compress-Archive -Path target\x86_64-pc-windows-msvc\release\bimble.exe,vc_redist.x64.exe -DestinationPath bimble_windows.zip
+
+      - name: Upload Artifact (Windows)
+        uses: actions/upload-artifact@v3
+        with:
+          name: bimble_windows
+          path: bimble_windows.zip
+
+  build-macos:
+    runs-on: macos-latest
+    needs: build-linux
+    outputs:
+      new_version: ${{ needs.build-linux.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: git fetch --prune --unshallow
+
+      - name: Get Latest Tag
+        id: get_latest_tag
+        run: echo "latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
+
+      - name: Increment Version
+        id: increment_version
+        run: |
+          latest_tag=${{ env.latest_tag }}
+          echo "Latest tag: $latest_tag"
+          version=${latest_tag#v}
+          major=$(echo $version | cut -d. -f1)
+          minor=$(echo $version | cut -d. -f2)
+          patch=$(echo $version | cut -d. -f3)
+          new_version="v$major.$minor.$((patch + 1))"
+          echo "::set-output name=new_version::$new_version"
+
+      - name: Set Up Rust for macOS
+        run: rustup target add x86_64-apple-darwin
+
+      - name: Build for macOS
+        run: cargo build --release --target x86_64-apple-darwin
+
+      - name: Verify Build Output (macOS)
+        run: |
+          if [ ! -f target/x86_64-apple-darwin/release/bimble ]; then
+            echo "Build output not found: target/x86_64-apple-darwin/release/bimble"
+            exit 1
+          fi
+
+      - name: Package for Release (macOS)
+        run: zip -j bimble_macos.zip target/x86_64-apple-darwin/release/bimble
+
+      - name: Upload Artifact (macOS)
+        uses: actions/upload-artifact@v3
+        with:
+          name: bimble_macos
+          path: bimble_macos.zip
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [build-linux, build-windows, build-macos]
+    steps:
+      - name: Download Artifacts (Linux)
+        uses: actions/download-artifact@v3
+        with:
+          name: bimble_linux
+          path: ./downloads
+
+      - name: Download Artifacts (Windows)
+        uses: actions/download-artifact@v3
+        with:
+          name: bimble_windows
+          path: ./downloads
+
+      - name: Download Artifacts (macOS)
+        uses: actions/download-artifact@v3
+        with:
+          name: bimble_macos
+          path: ./downloads
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ needs.build-linux.outputs.new_version }}
+          release_name: Release ${{ needs.build-linux.outputs.new_version }}
+          body: |
+            Release notes for ${{ needs.build-linux.outputs.new_version }}
+            Added windows, mac, linux removed source code, targets folders and integrations, kept bimble the command, changed fork and recreated from ground up, updated repo, removed readme file, added vc_redist 64Bit in bimble_windows.zip file
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset (Linux)
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./downloads/bimble_linux.zip
+          asset_name: bimble_linux.zip
+          asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset (Windows)
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./downloads/bimble_windows.zip
+          asset_name: bimble_windows.zip
+          asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset (macOS)
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./downloads/bimble_macos.zip
+          asset_name: bimble_macos.zip
+          asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
